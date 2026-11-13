@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<script src="cloud.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E9EDE7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111718" media="(prefers-color-scheme: dark)">
+<title>Инструменты D&amp;D 2024</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9C%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#E9EDE7;--sf:#F8FAF6;--ink:#1C2A2B;--mu:#5A6865;--ln:#C3CDC5;--ac:#2B6D66;
+ --c1:#2B6D66;--c2:#8C2C3A;--c3:#21443A;--gold:#B8963A;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua","Noto Serif","PT Serif",Georgia,serif;
+ --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;color-scheme:light;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111718;--sf:#192122;--ink:#E1E8E3;--mu:#96A4A0;--ln:#2F3C3D;--ac:#66B5AA;
+ --c1:#3F8F86;--c2:#A8475A;--c3:#2F6B58;--gold:#D4B064;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#111718;--sf:#192122;--ink:#E1E8E3;--mu:#96A4A0;--ln:#2F3C3D;--ac:#66B5AA;--c1:#3F8F86;--c2:#A8475A;--c3:#2F6B58;--gold:#D4B064;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+main{max-width:560px;margin:0 auto;padding:36px 18px 48px}
+h1{margin:0;font:600 clamp(44px,13vw,64px)/.95 var(--serif);letter-spacing:-.01em}
+.sub{margin:14px 0 0;font:400 18px/1.4 var(--serif);color:var(--mu);max-width:30ch}
+.sub small{display:block;font:400 12.5px/1.4 var(--sans);margin-top:4px}
+
+.shelf{list-style:none;margin:34px 0 0;padding:0;display:grid;gap:10px}
+.tool{position:relative;display:flex;align-items:center;gap:14px;min-height:92px;padding:14px 14px 14px 0;border:1px solid var(--ln);border-radius:4px 12px 12px 4px;background:var(--sf);color:inherit;text-decoration:none;overflow:hidden}
+.tool:active{background:var(--bg)}
+.spine{align-self:stretch;flex:none;width:30px;margin:-14px 0;background:var(--c);position:relative}
+.spine::before,.spine::after{content:"";position:absolute;left:6px;right:6px;height:7px;border-top:1.5px solid var(--gold);border-bottom:1.5px solid var(--gold);opacity:.85}
+.spine::before{top:12px}.spine::after{bottom:12px}
+.ic{flex:none;width:30px;height:30px;color:var(--c)}
+.ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tx{flex:1;min-width:0}
+.tx b{display:block;font:600 20px/1.2 var(--serif)}
+.tx b small{font:400 12px/1.3 var(--sans);color:var(--mu);margin-left:6px;white-space:nowrap}
+.tx span{display:block;margin-top:3px;font-size:14px;color:var(--mu)}
+.chev{flex:none;font-size:26px;line-height:1;color:var(--mu)}
+.t1{--c:var(--c1)}.t2{--c:var(--c2)}.t3{--c:var(--c3)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ic{color:color-mix(in srgb,var(--c) 55%,var(--ink))}}
+
+.cloud{margin-top:34px;padding:18px;border:1px solid var(--ln);border-radius:14px;background:var(--sf)}
+</style>
+</head>
+<body>
+<main>
+  <h1>D&amp;D 2024</h1>
+  <p class="sub">Персонажи, бои и цены для вашего стола<small lang="en">Character builder, combat tracker, price guide</small></p>
+
+  <ul class="shelf">
+    <li><a class="tool t1" href="builder.html">
+      <span class="spine" aria-hidden="true"></span>
+      <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M23 4c-6 1.5-11 7-12.5 15.5L9 27"/><path d="M23 4c.8 5.5-1.6 11.2-8.5 14.2"/><path d="M12.3 13.5c2.6.2 5 .1 7.4-.7"/><path d="M6 28h11"/></svg></span>
+      <span class="tx"><b>Создание персонажа<small lang="en">Character builder</small></b><span>Пошагово от класса до листа для печати</span></span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a></li>
+    <li><a class="tool t2" href="combat.html">
+      <span class="spine" aria-hidden="true"></span>
+      <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 5l15 15M5 5v5M5 5h5"/><path d="M27 5L12 20M27 5v5M27 5h-5"/><path d="M17 23l-6-6M15 23l6-6"/><path d="M9 25l-3 3M23 25l3 3"/></svg></span>
+      <span class="tx"><b>Трекер боя<small lang="en">Combat tracker</small></b><span>Инициатива, хиты, монстры и герои</span></span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a></li>
+    <li><a class="tool t3" href="prices.html">
+      <span class="spine" aria-hidden="true"></span>
+      <span class="ic" aria-hidden="true"><svg viewBox="0 0 32 32"><ellipse cx="13" cy="9" rx="8" ry="3"/><path d="M5 9v4c0 1.7 3.6 3 8 3s8-1.3 8-3V9"/><path d="M5 13v4c0 1.7 3.6 3 8 3"/><ellipse cx="20" cy="20" rx="7" ry="2.6"/><path d="M13 20v4c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6v-4"/></svg></span>
+      <span class="tx"><b>Прейскурант<small lang="en">Price guide</small></b><span>Цены, лавки, таверны и общий счёт</span></span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a></li>
+  </ul>
+
+  <section class="cloud" aria-label="Облачное сохранение">
+    <div data-cloud-panel></div>
+  </section>
+</main>
+</body>
+</html>
