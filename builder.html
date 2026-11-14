@@ -3788,6 +3788,12 @@ const KEY='dnd24-builder-v1',SKEY='dnd24-settings-v1';
 let SET={exp:false};
 try{SET=Object.assign(SET,JSON.parse(localStorage.getItem(SKEY))||{})}catch(e){}
 function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){}}
+const SRCT={EFA:'efa',HoF:'hof',Ravenloft:'rav',AU:'au',WoW:'wow',DDB:'ddb'};
+const SRCG=[['efa','Eberron: Forge of the Artificer','2025'],['hof','Forgotten Realms: Heroes of Faerûn','2025'],['rav','Ravenloft: The Horrors Within','2026'],['au','Arcana Unleashed','2026'],['wow','D&D: World of Warcraft','2026'],['ddb','D&D Beyond: Shadowfell Secrets','2026'],['leg','Подклассы 2014 года','Xanathar’s, Tasha’s, SCAG и др. — по обратной совместимости'],['spx','Виды из других книг','Mordenkainen Presents, Spelljammer, Strixhaven, Van Richten’s — адаптированы к 2024']];
+function srcKey(o){return (o.tag&&SRCT[o.tag])||(o.leg?'leg':/Forge of the Artificer/.test(o.src||'')?'efa':'spx')}
+function expOn(o){return !!SET.exp&&!(SET.off||{})[srcKey(o)]}
+function srcCount(k){let c=0,s=0,v=0;for(const cl of Object.values(CLS)){if(cl.exp&&srcKey(cl)===k) c++;for(const sb of Object.values(cl.subs)) if(sb.exp&&!sb.old&&srcKey(sb)===k) s++;}for(const sp of Object.values(SPEC)) if(sp.exp&&!sp.old&&srcKey(sp)===k) v++;
+ return [c?(c===1?'класс':c+' класса'):'',s?s+' '+plural(s,'подкласс','подкласса','подклассов'):'',v?v+' '+plural(v,'вид','вида','видов'):''].filter(Boolean).join(', ');}
 function newState(){return {v:1,step:0,cls:'',lvl:1,sub:'',hp:'avg',rolls:{},bg:'',bgm:'21',bg2:'',bg1:'',sp:'',am:'std',std:{},pbuy:{str:8,dex:8,con:8,int:8,wis:8,cha:8},man:{str:10,dex:10,con:10,int:10,wis:10,cha:10},ch:{},can:[],prep:[],book:[],eqC:0,eqB:0,rid:'',arts:[],qd:{},mag:{},wear:'auto',shield:'auto',coins:{cp:'',sp:'',ep:'',gp:'',pp:''},info:{name:'',player:'',align:'',xp:'',looks:'',story:''}}}
 const FRAMED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 let S=newState(),CUR=null,app=null,PREV={},UI={filter:{},reset:0,open:{},touched:{},focus:null,msg:'',del:null,code:0,det:{start:true},toast:'',view:'home',hcode:0};
@@ -3890,10 +3896,10 @@ function pending(C){
 
 // ---- шаги ----
 function clsInfo(c){
- return `Спасброски: ${c.saves.map(a=>ABN[a]).join(', ')}. Доспехи: ${c.armor.map(a=>ARMCAT[a]).join(', ')||'нет'}. Оружие: ${c.weap.map(w=>WPN[w]).join(', ')}. Навыки: ${c.sk[0]} на выбор.${c.sc?' Заклинатель.':''} Подклассы: ${Object.values(c.subs).filter(s=>!s.leg&&(!s.exp||SET.exp)).map(s=>s.n).join(', ')}${(n=>n?`; ещё ${n} ${plural(n,'подкласс','подкласса','подклассов')} 2014 года`:'')(SET.exp?Object.values(c.subs).filter(s=>s.leg).length:0)}.`;
+ return `Спасброски: ${c.saves.map(a=>ABN[a]).join(', ')}. Доспехи: ${c.armor.map(a=>ARMCAT[a]).join(', ')||'нет'}. Оружие: ${c.weap.map(w=>WPN[w]).join(', ')}. Навыки: ${c.sk[0]} на выбор.${c.sc?' Заклинатель.':''} Подклассы: ${Object.values(c.subs).filter(s=>!s.leg&&!s.old&&(!s.exp||expOn(s))).map(s=>s.n).join(', ')}${(n=>n?`; ещё ${n} ${plural(n,'подкласс','подкласса','подклассов')} 2014 года`:'')(expOn({leg:1})?Object.values(c.subs).filter(s=>s.leg&&!s.old).length:0)}.`;
 }
 function rClass(C){
- return `<p class="lead">Класс задаёт хиты, владения и почти все умения. Остальные шаги подстроятся под него.</p>`+Object.entries(CLS).filter(([id,c])=>!c.exp||SET.exp||S.cls===id).map(([id,c])=>opt({a:'cls',v:id,on:S.cls===id,n:c.n+(c.exp?` <span class="xb">${c.tag||'эксп.'}</span>`:''),e:c.e,m:`к${c.hd} хитов, главное — ${c.prim.toLowerCase()}`+(c.src?`; из книги ${c.src}`:''),t:clsInfo(c)})).join('')+(SET.exp||!Object.values(CLS).some(c=>c.exp)?'':`<p class="hint">Изобретатель (Eberron: Forge of the Artificer) появится, если включить экспериментальные материалы на главном экране.</p>`);
+ return `<p class="lead">Класс задаёт хиты, владения и почти все умения. Остальные шаги подстроятся под него.</p>`+Object.entries(CLS).filter(([id,c])=>!c.exp||expOn(c)||S.cls===id).map(([id,c])=>opt({a:'cls',v:id,on:S.cls===id,n:c.n+(c.exp?` <span class="xb">${c.tag||'эксп.'}</span>`:''),e:c.e,m:`к${c.hd} хитов, главное — ${c.prim.toLowerCase()}`+(c.src?`; из книги ${c.src}`:''),t:clsInfo(c)})).join('')+(Object.values(CLS).every(c=>!c.exp||expOn(c))?'':`<p class="hint">Изобретатель появится, если на главном экране включить экспериментальные материалы и книгу Eberron: Forge of the Artificer.</p>`);
 }
 function rLevel(C){
  if(!C.cls) return '<p class="lead">Сначала выберите класс.</p>';
@@ -3901,7 +3907,7 @@ function rLevel(C){
  let s=`<p class="lead">Уровни 1–20. Бонус мастерства на этом уровне: ${sgn(C.pb)}.</p>`+seg('lvl',S.lvl,Array.from({length:20},(_,i)=>[i+1,i+1]));
  s+=`<h2>${c.subN}</h2>`;
  if(C.L<3) s+='<p class="hint">Подкласс выбирается с 3 уровня.'+(Object.values(c.subs).some(sb=>sb.base)?' Варианты основы класса (экспериментальный режим) выбираются сразу.':'')+'</p>';
- {const elig=Object.entries(c.subs).filter(([id,sb])=>(C.L>=3||sb.base)&&(!sb.old||S.sub===id)),vis=elig.filter(([id,sb])=>!sb.exp||SET.exp||S.sub===id),hid=elig.length-vis.length;
+ {const elig=Object.entries(c.subs).filter(([id,sb])=>(C.L>=3||sb.base)&&(!sb.old||S.sub===id)),vis=elig.filter(([id,sb])=>!sb.exp||expOn(sb)||S.sub===id),hid=elig.length-vis.length;
   const so=([id,sb])=>opt({a:'sub',v:id,on:S.sub===id,n:sb.n+(sb.exp?` <span class="xb">${sb.tag||(sb.leg?'2014':'эксп.')}</span>`:''),e:sb.e,m:sb.src?'из книги '+sb.src:'',t:sb.f.map(f=>`${f.l} ур.: ${f.n}`).join('; ')+(sb.cv?`. <i>${sb.cv}</i>`:'')});
   const main=vis.filter(([,sb])=>!sb.leg),leg=vis.filter(([,sb])=>sb.leg);
   s+=main.map(so).join('');
@@ -3923,7 +3929,7 @@ function rSpecies(C){
  let s='<p class="lead">Вид определяет размер, скорость и врождённые особенности. Характеристики от вида в правилах 2024 года не зависят: виды из других книг тоже без прибавок, их даёт предыстория.</p>';
  let hid=0;
  for(const [id,sp] of Object.entries(SPEC)){
-  if((sp.exp&&!SET.exp||sp.old)&&S.sp!==id){if(!sp.old) hid++;continue;}
+  if((sp.exp&&!expOn(sp)||sp.old)&&S.sp!==id){if(!sp.old) hid++;continue;}
   s+=opt({a:'sp',v:id,on:S.sp===id,n:sp.n+(sp.exp?' <span class="xb">эксп.</span>':''),e:sp.e,m:`${sp.size==='MS'?'Средний или Маленький':sp.size==='S'?'Маленький':'Средний'}, скорость ${sp.spd} фт${sp.src?'; из книги '+sp.src:''}`,t:sp.f.map(f=>f.n+(f.l?` (с ${f.l} ур.)`:'')).join(', ')});
   if(S.sp===id) s+=`<div class="inl">${rChoices(C,3)}</div>`;}
  if(hid) s+=`<p class="hint">Ещё ${hid} экспериментальных вида скрыто — их можно включить на главном экране.</p>`;
@@ -4025,7 +4031,7 @@ function rEquip(C){
  s+=rArts(C);
  const wg=[['Простое рукопашное',1,0],['Простое дальнобойное',1,1],['Воинское рукопашное',0,0],['Воинское дальнобойное',0,1]];
  s+=`<h2>Добавить</h2>`+det('w','Оружие ('+Object.keys(W).length+')',wg.map(([t,sm,rg])=>`<p class="lvh">${t}</p>`+Object.keys(W).filter(id=>W[id][2]===sm&&W[id][3]===rg).map(id=>addRow(C,'addw',id)).join('')).join(''))
-  +det('a','Доспехи и щит ('+Object.keys(ARM).length+')',[['light','Лёгкие'],['medium','Средние'],['heavy','Тяжёлые'],['shield','Щит']].map(([cat,t])=>`<p class="lvh">${t}</p>`+Object.keys(ARM).filter(id=>ARM[id][2]===cat&&(ARM[id][6]!=='exp'||SET.exp)).map(id=>addRow(C,'adda',id)).join('')).join(''))
+  +det('a','Доспехи и щит ('+Object.keys(ARM).length+')',[['light','Лёгкие'],['medium','Средние'],['heavy','Тяжёлые'],['shield','Щит']].map(([cat,t])=>`<p class="lvh">${t}</p>`+Object.keys(ARM).filter(id=>ARM[id][2]===cat&&(ARM[id][6]!=='exp'||expOn({leg:1}))).map(id=>addRow(C,'adda',id)).join('')).join(''))
   +det('i','Другой предмет',`<div class="addi"><input id="newitem" placeholder="Например, верёвка (50 фт)" maxlength="80" aria-label="Название предмета"><input id="newq" type="number" inputmode="numeric" min="1" value="1" aria-label="Количество"><button type="button" class="btn pri" data-a="additem">Добавить</button></div>`);
  s+=`<h2>Монеты</h2><div class="coinr">${[['cp','ММ'],['sp','СМ'],['ep','ЭМ'],['gp','ЗМ'],['pp','ПМ']].map(([k,n])=>`<label>${n}<input type="number" inputmode="numeric" min="0" data-k="coins.${k}" value="${h(C.coins[k])}"></label>`).join('')}</div>`;
  s+=`<h2>Атаки</h2><table class="abt"><tr><th>Атака</th><th>Бонус</th><th>Урон</th></tr>${C.attacks.map(a=>`<tr><td>${a.n}${a.mast?` <i>${a.mast}</i>`:''}${a.prof?'':' <i>без владения</i>'}</td><td>${sgn(a.atk)}</td><td>${a.dmg}</td></tr>`).join('')}</table>`;
@@ -4052,7 +4058,7 @@ function rHome(){
 <p class="lead">Герой 1–20 уровня по шагам: класс, происхождение, характеристики, умения, заклинания и снаряжение. В конце — готовый лист для печати и PDF.</p>
 <button type="button" class="btn pri big" data-a="new">Создать персонажа</button>
 ${has?`<button type="button" class="cont" data-a="cont">${porImg('av',S)}<span class="cb1"><small>Продолжить</small><b>${h(S.info.name)||'Без имени'}</b><span>${h(summaryOf(S))}, шаг «${STEPS[S.step].n}»</span></span><span class="arr" aria-hidden="true">›</span></button>`:''}
-<h2>Материалы</h2><div class="segw">${seg('exp',SET.exp?1:0,[[0,'Основные'],[1,'Экспериментальные']])}</div><p class="hint">${SET.exp?'Включены класс Изобретатель и подклассы 5.5e из новых книг (Forge of the Artificer, Heroes of Faerûn, Ravenloft 2026, Arcana Unleashed, World of Warcraft, Shadowfell Secrets), виды и подклассы из других книг (Mordenkainen Presents, Spelljammer, Eberron, DMG 2014 и др.), вручную адаптированные к правилам 2024 года, и подклассы 2014 года (Xanathar’s, Tasha’s, SCAG и др.) по правилу обратной совместимости. Они помечены книгой, «эксп.» или «2014»; старые карточки, у которых есть новая версия, видны только в сохранённых персонажах.':'Только PHB 2024 и проверенные дополнения. «Экспериментальные» добавят новые варианты выборов.'}</p>
+<h2>Материалы</h2><div class="segw">${seg('exp',SET.exp?1:0,[[0,'Основные'],[1,'Экспериментальные']])}</div>${SET.exp?`<p class="hint">Отметьте, из каких книг брать варианты. Старые карточки, у которых есть новая версия, видны только в сохранённых персонажах.</p><div class="srcs">${SRCG.map(([k,n,d])=>opt({a:'srct',v:k,on:!(SET.off||{})[k],multi:1,n,m:[d,srcCount(k)].filter(Boolean).join(' · ')})).join('')}</div>`:'<p class="hint">Только PHB 2024 и проверенные дополнения. «Экспериментальные» добавят варианты из других книг — какие именно, можно выбрать.</p>'}
 <h2>Мои персонажи${rs.length?` <span class="cnt">${rs.length}</span>`:''}</h2><div class="rosw">${rRoster()}</div>
 <h2>Загрузить</h2><div class="acts"><label class="btn">Из PDF или файла<input id="imp" type="file" accept=".pdf,application/pdf,.json,application/json" hidden></label><button type="button" class="btn ghost" data-a="hcode">${UI.hcode?'Скрыть':'По коду'}</button></div>
 ${UI.hcode?`<div class="codeb"><label class="fl">Вставьте код персонажа<textarea id="codein" rows="4" placeholder="{&quot;v&quot;:1,…}"></textarea></label><button type="button" class="btn sm" data-a="paste">Загрузить из кода</button></div>`:''}
@@ -4250,6 +4256,7 @@ function act(a,c,v){
   case 'new': S=newState();UI.view='wiz';UI.msg='';UI.code=0;UI.filter={};UI.toast='Новый персонаж. Предыдущий — в «Мои персонажи».';return 'nav';
   case 'hcode': UI.hcode=UI.hcode?0:1;break;
   case 'exp': SET.exp=v==='1';saveSet();UI.toast=SET.exp?'Экспериментальные материалы включены.':'Только основные материалы.';break;
+  case 'srct': SET.off=Object.assign({},SET.off);SET.off[v]=!SET.off[v];saveSet();break;
   case 'rsave': {const r=roster();if(!S.rid||!r.some(e=>e.id===S.rid)) S.rid=S.rid||'c'+Date.now().toString(36);const e={id:S.rid,name:S.info.name||'Без имени',sum:summaryOf(S),at:Date.now(),st:JSON.parse(JSON.stringify(Object.assign({},S,{step:0})))};const i=r.findIndex(x=>x.id===S.rid);if(i>=0) r[i]=e; else r.unshift(e);UI.msg=setRoster(r)?'Сохранено в «Мои персонажи».':'Не удалось сохранить: хранилище браузера недоступно в этом окне.';break;}
   case 'ropen': {const e=roster().find(x=>x.id===v);if(!e) break;loadState(e.st);S.rid=e.id;S.step=10;UI.view='wiz';UI.msg='';UI.toast='Открыт «'+e.name+'».';UI.del=null;return 'nav';}
   case 'rdel': {if(UI.del!==v){UI.del=v;break;}setRoster(roster().filter(x=>x.id!==v));if(S.rid===v){S=newState();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}UI.del=null;UI.toast='Персонаж удалён.';render();return 'none';}
