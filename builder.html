@@ -2506,6 +2506,33 @@ S5('artificer','reanimator','rav',{n:'Реаниматор',e:'Reanimator',f:[
  {l:5,id:'smo',n:'Странные модификации',e:'Strange Modifications',t:(L,C)=>`Создавая спутника, выберите модификации (${L>=15?3:L>=9?2:1}, разные). Мистический проводник: можно творить из его места его чувствами; в 120 фт раз в ход +${C?C.m.int:'мод. Инт'} к урону заклинания изобретателя школы воплощения или некромантии. Свирепость: кость Ужасного взмаха — к6.${L>=9?` С 9 ур.: Раздутый — Большой, толчок на 10 фт, к Предсмертному взрыву +${C?C.m.int:'мод. Инт'}; Тощий — скорость и лазание 45 фт по стенам и потолку, существа в 10 фт: спасбросок Мдр или испуганы; Влажный — плавание, проход в щель 1 дюйм, попавший по нему в 10 фт получает ${C?C.m.int:'мод. Инт'} кислотой.`:''}`},
  {l:9,id:'irn',n:'Улучшенная реанимация',e:'Improved Reanimation',t:'Предсмертный взрыв — 4к4; некротический урон спутника игнорирует сопротивление; две разные модификации из расширенного списка.'},
  {l:15,id:'frn',n:'Отточенная реанимация',e:'Refined Reanimation',t:'Три модификации. Раз за долгий отдых — «Оживление» без ячейки и материальных компонентов (с инструментами). Реакцией, когда вы или спутник получаете урон, восстановите себе хиты, равные текущим хитам спутника; он погибает и взрывается.',fx:[U5('Оживление без ячейки',1,'дол.')]}]});
+// ===== Исправления по аудиту (431ff3b): уровни, подклассы, тексты =====
+{const f=Ff('cleric','cd'),o=f.t;f.t=(L,C)=>o(L,C).replace(/Божественная искра: действием \dк8/,`Божественная искра: действием Магия ${L>=18?4:L>=13?3:L>=7?2:1}к8`);}
+{const bw=SPEC.dragonborn.f.find(f=>f.id==='bw');bw.t=(L,C)=>`Вместо одной атаки действия Атака: конус 15 фт или линия 30×5 фт; спасбросок Лов (Сл ${C?8+C.m.con+C.pb:'8 + мод. Тел + мастерство'}), ${L>=17?4:L>=11?3:L>=5?2:1}к10 урона (${C&&C.nt.breath||'тип предка'}), половина при успехе. Использований = бонус мастерства за долгий отдых.`;
+ const fl=SPEC.dragonborn.f.find(f=>f.id==='fl');if(fl) fl.t='Раз за долгий отдых бонусным действием на 10 минут получите скорость полёта, равную скорости. Полёт кончается раньше, если вы становитесь недееспособны.';}
+Ff('fighter','cs','battlemaster').fx[1].n=L=>L>=15?9:L>=10?7:L>=7?5:3;
+{const rc=Ff('fighter','rc','runeknight'),o=rc.t;rc.t=(L,C)=>o(L,C).replace(/Известно рун: \d/,`Известно рун: ${L>=15?5:L>=10?4:L>=7?3:2}`).replace('активный — раз за',`активный — ${L>=15?'дважды':'раз'} за`);rc.fx[0].n=L=>L>=15?5:L>=10?4:L>=7?3:2;
+ Ff('fighter','gm','runeknight').t=L=>`Бонусным действием на минуту: вы становитесь ${L>=18?'Большим или Огромным (досягаемость +5 фт)':'Большим'} (если хватает места), получаете преимущество на проверки и спасброски Силы, а раз в свой ход попадание оружием или безоружным ударом наносит +${L>=18?'1к10':L>=10?'1к8':'1к6'} урона. Использований = бонус мастерства за долгий отдых.`;}
+Ff('fighter','fs','samurai').t=L=>`Бонусным действием: преимущество на атаки оружием до конца хода и ${L>=15?15:L>=10?10:5} временных хитов. 3 раза за долгий отдых.`;
+Ff('fighter','rst','samurai').t='Раз в ход, если в действии Атака у вас есть преимущество на атаку по цели, можно отказаться от него и совершить по этой цели ещё одну атаку оружием в рамках того же действия.';
+Ff('barbarian','ff','zealot').t=L=>`Раз за ярость, провалив спасбросок, перебросьте его с бонусом +${rageD20(L)} (равен урону ярости); нужно использовать новый результат.`;
+Ff('fighter','as').t=L=>L>=17?'Дважды за короткий или долгий отдых (но не больше одного раза за ход) получите дополнительное действие, кроме действия Магия.':'Раз за короткий или долгий отдых получите дополнительное действие, кроме действия Магия.';
+Ff('warlock','mc').t=L=>L>=20?'Раз за долгий отдых ритуалом в 1 минуту восстановите все потраченные ячейки договора (Мистический мастер).':'Раз за долгий отдых ритуалом в 1 минуту восстановите потраченные ячейки договора — не больше половины их максимума (округляя вверх).';
+{const rv=Ff('ranger','rv');rv.t='Скорость +10 фт, если вы не в тяжёлом доспехе. Скорость лазания и плавания равна вашей скорости.';rv.fx.push({t:'move',k:'лазание',v:'eq'},{t:'move',k:'плавание',v:'eq'});}
+Ff('ranger','fsl').fx=[{t:'spx',id:'huntersmark',re:'1к6',to:'1к10'}];
+INV.push({v:'wsi',n:'Ведьмин взгляд',e:'Witch Sight',req:{l:15},t:'Истинное зрение 30 фт.',fx:[{t:'sense',k:'Истинное зрение',v:30}]});
+{const m=Ff('warlock','ma17');m.fx[0].plusSub={genie:['wish']};m.t='Ещё одно заклинание колдуна 9 круга: раз за долгий отдых без ячейки. Покровитель Гений может выбрать «Исполнение желаний» (расширенный список).';}
+{const sm=Ff('wizard','smy');sm.t='Выберите из своей книги заклинание 1 круга и заклинание 2 круга со временем «действие»: они всегда подготовлены сверх лимита, и вы творите их низшим кругом без ячейки. После долгого отдыха можно заменить одно из них другим заклинанием того же круга из книги.';sm.fx.forEach(x=>x.book=1);
+ const ss=Ff('wizard','ss');ss.t='Выберите из своей книги два разных заклинания 3 круга: они всегда подготовлены сверх лимита, и каждое раз за короткий или долгий отдых творится 3 кругом без ячейки.';ss.fx[0].book=1;}
+for(const c of Object.values(CLS)) for(const f of c.f) if(f.id==='eb'&&f.l===19) f.fx[0].cat=['epic','gen','origin','fs'];
+FEATS.bsr.t=FEATS.bsr.t.replace(/Раз за долгий отдых сотворите[^.]*\./,'Каждый раз, творя заклинание ячейкой 1–4 круга, бросьте 1к4: если выпал круг ячейки, она не тратится.');FEATS.bsr.fx=FEATS.bsr.fx.filter(x=>x.t!=='use');
+FEATS.bsp.t=FEATS.bsp.t.replace('Отход — бонусным действием; скорость +30 фт.','Бонусным действием можно совершить Отход, и он снимает с вас захват. Скорость +30 фт.');
+{const d=Ff('fighter','dst','sorrowknight'),o=d.t;d.t=(L,C)=>o(L,C).replace('спасбросок Инт или оглушён и считает','спасбросок Инт или цель оглохла (Deafened) и считает');
+ const a=Ff('fighter','dap','sorrowknight'),oa=a.t;a.t=(L,C)=>oa(L,C).replace('Страх — раз за короткий или долгий отдых; телепорт — при каждом Тактическом сдвиге.','Урон и испуг вместе — раз за короткий или долгий отдых; сам телепорт — при каждом Тактическом сдвиге.');a.fx[0].n='Ужасающее появление: урон и испуг';}
+if(SPEC.siren){SPEC.siren.old=1;}
+{const aa=Ff('artificer','aar','armorer');aa.t+=' Требование Силы тяжёлого доспеха не снижает вам скорость.';aa.fx=[{t:'flag',v:'arcanearmor'}];
+ const md=Ff('artificer','amd','armorer');for(const o of md.fx[0].opts) o.fx=[{t:'flag',v:'am_'+o.v}].concat(o.v==='infil'?[{t:'speed',v:5}]:[]);
+ const bs=Ff('artificer','brd','battlesmith');bs.t='Владение воинским оружием; оружие, которым вы владеете, служит фокусировкой. Атакуя магическим оружием, можно использовать Интеллект для атаки и урона (учтено в таблице атак).';bs.fx.push({t:'flag',v:'battleready'});}
 // ===== Заклинания 0–4 круга =====
 // Рус|Англ|круг|школа|время|дистанция|компоненты|длительность|флаги(c — концентрация, r — ритуал)|классы|кратко
 // классы: b бард, c жрец, d друид, p паладин, r следопыт, s чародей, k колдун, w волшебник
@@ -2791,7 +2818,7 @@ const DUR={'Мгн':'Мгновенно','1 р':'1 раунд'};
 // Дистанция атаки, если она отличается от дистанции сотворения
 const ATKR={produceflame:'60 фт'};
 const dur=d=>DUR[d]||d;
-function spFull(sp,L){const m=SPMAT[sp.id];return spText(sp,L)+(m?` Компонент: ${m[0]} — ${m[1]?'тратится при сотворении':'не тратится'}.`:'')}
+function spFull(sp,L,C){const m=SPMAT[sp.id];return spText(sp,L,C)+(m?` Компонент: ${m[0]} — ${m[1]?'тратится при сотворении':'не тратится'}.`:'')}
 // Краткая справка по состояниям и терминам — показывается только там, где они встречаются
 const GLOSS=[
  [/ослепл/i,'Ослеплён','не видит и проваливает проверки, где нужно зрение; атаки по нему — с преимуществом, его атаки — с помехой.'],
@@ -3051,6 +3078,8 @@ SPMAT.homunculusservant=['самоцвет ценой 100+ зм',0];
  'arcaneeye fabricate freedomofmovement leomundssecretchest mordenkainensfaithfulhound mordenkainensprivatesanctum otilukesresilientsphere stoneshape stoneskin summonconstruct '+
  'animateobjects bigbyshand circleofpower creation greaterrestoration wallofstone').split(' ').forEach(id=>{const sp=SPL[id];if(sp&&!sp.cls.includes('a')) sp.cls+='a';});
 SPLA.sort((a,b)=>a.l-b.l||a.n.localeCompare(b.n,'ru'));
+// ===== Исправления по аудиту: заклинания подклассов =====
+Object.assign(SPL.prayerofmending,{s:'о',t:'a',r:'60 фт',c:'ВМ',d:'1 мин',cn:false,x:'Согласное существо: в следующий раз, получив урон, оно восстанавливает 1к8 + мод. заклинательной характеристики заклинателя хитов, и защита переходит к союзнику в 30 фт от него. Заклинание кончается, если подходящей цели нет, или после пяти исцелений. +1 исцеление за каждый круг ячейки выше 3.'});
 // ===== Мастерская артефактов: справочники и применение эффектов =====
 const FKIND=[['weapon','Оружие'],['armor','Доспех или щит'],['other','Другое']];
 const RARITY=['','Обычный','Необычный','Редкий','Очень редкий','Легендарный','Артефакт'];
@@ -3135,6 +3164,7 @@ function applyFx(C,fx,P,root,src,step,pre,g){
  if(fx.l&&fx.l>L) return;
  switch(fx.t){
   case 'prof': for(const v of [].concat(fx.v)) addProf(C,fx.k,v,P); break;
+  case 'spx': C.spX.push(fx); break;
   case 'abhi': C.abHi.push([fx.a,fx.v,fx.max||30]); break;
   case 'ab': C.abB[fx.a]+=fx.v; C.abLog.push([fx.a,fx.v,C._lvl||0]); break;
   case 'hp': C.hpB+=fx.per?fx.per*L:fx.v; break;
@@ -3175,8 +3205,27 @@ function choose(C,fx,P,root,src,step,pre,g){
  const ch={id,fx,n,sel,src,k:fx.k,label:fx.label||src,step:fx.step||(fx.k==='spell'?7:step),hidden:!!forced,root,depth:(id.match(/>/g)||[]).length,lvl:C._lvl||0};
  C.choices.push(ch);
  for(const v of sel) applySel(C,ch,v,root,src,step,g);
+ if(ch.bad){const b=ch.bad.map(x=>x[0]);ch.sel=ch.sel.filter(v=>!b.includes(v));for(const [v,why] of ch.bad) C.notes.push(`«${ch.label}»: выбор «${(FEATS[v]||SPL[v]||{n:v}).n}» снят — ${why}. Выберите заново.`);}
 }
 
+function spellOk(C,fx,sp){
+ const plus=(fx.plusSub&&fx.plusSub[C.S.sub])||[];
+ if(plus.includes(sp.id)) return typeof fx.lvl!=='number'||sp.l===fx.lvl;
+ if(typeof fx.lvl==='number'&&sp.l!==fx.lvl) return false;
+ if(fx.lvl==='max'&&sp.l<1) return false;
+ const lst=fx.list==='any'?null:fx.list;
+ if(lst&&![...lst].some(c=>sp.cls.includes(c))) return false;
+ if(!lst&&sp.cls==='-') return false;
+ if(fx.school&&!fx.school.includes(sp.s)) return false;
+ if(fx.rit&&!sp.ri) return false;
+ if(fx.book&&!(C.S.book||[]).includes(sp.id)) return false;
+ return true;
+}
+function featReqE(C,F,lvl){
+ if(!F.req) return true;
+ return F.req.split('|').some(r=>{const m=/^([a-z]+)(\d+)$/.exec(r);if(!m||!AB.includes(m[1])) return true;
+  let v=(C.base[m[1]]||0)+C.bgB[m[1]];for(const [x,n,l] of C.abLog) if(x===m[1]&&l<(lvl||99)) v+=n;return Math.min(20,v)>=+m[2];});
+}
 function applySel(C,ch,v,root,src,step,g){
  const fx=ch.fx;
  switch(fx.k){
@@ -3191,9 +3240,11 @@ function applySel(C,ch,v,root,src,step,g){
   case 'asi': if(AB.includes(v)){C.abB[v]+=1;C.abLog.push([v,1,ch.lvl]);} break;
   case 'castab': break;
   case 'mastery': if(W[v]) C.mastery.push(v); break;
-  case 'spell': if(SPL[v]) C.extra.push({id:v,src,ab:resolveAb(C,fx.ab,root),note:fx.note||''}); break;
+  case 'spell': {const sp=SPL[v];if(!sp||!spellOk(C,fx,sp)){(ch.bad=ch.bad||[]).push([v,'не подходит под условия выбора']);break;}C.extra.push({id:v,src,ab:resolveAb(C,fx.ab,root),note:fx.note||''});break;}
   case 'feat': {
    const F=FEATS[v]; if(!F) break;
+   if(!F.rep&&(C.featIds[v]||(C.bg&&C.bg.feat===v&&!ch.id.startsWith('b:')))){(ch.bad=ch.bad||[]).push([v,'эта черта у вас уже есть']);break;}
+   if(!featReqE(C,F,ch.lvl)){(ch.bad=ch.bad||[]).push([v,'требование черты больше не выполнено']);break;}
    C.featIds[v]=(C.featIds[v]||0)+1;
    const p=ch.id+'>'+v+':';
    C.feats.push({n:F.n,e:F.e,t:F.t,g:'Черты'});
@@ -3214,7 +3265,7 @@ function newC(S){
  return {S,L,pb:PB(L),cls:CLS[S.cls]||null,sub:null,bg:BG[S.bg]||null,sp:SPEC[S.sp]||null,
   prof:{skill:{},save:{},armor:{},weapon:{},tool:{},lang:{}},exp:{},expSel:[],skx:[],abB:{str:0,dex:0,con:0,int:0,wis:0,cha:0},bgB:{str:0,dex:0,con:0,int:0,wis:0,cha:0},
   feats:[],choices:[],spells:[],extra:[],uses:[],mastery:[],hpB:0,speedB:[],acAlt:[],resist:new Set(),senses:{},senseAdd:[],flags:{},nt:{},skillB:[],
-  size:'Средний',speed:30,canB:0,bookB:0,featIds:{},notes:[],info:[],abLog:[],_lvl:0,acB:0,moveFx:[],listAdd:'',listIds:new Set(),canAdd:'',initAb:[],bookIds:new Set(),abItem:{str:0,dex:0,con:0,int:0,wis:0,cha:0},abSet:{},abHi:[],acSrc:[],saveB:0,spAtkB:0,spDcB:0,initB:0,arts:[]};
+  size:'Средний',speed:30,canB:0,bookB:0,featIds:{},notes:[],info:[],abLog:[],_lvl:0,acB:0,moveFx:[],listAdd:'',listIds:new Set(),canAdd:'',initAb:[],bookIds:new Set(),abItem:{str:0,dex:0,con:0,int:0,wis:0,cha:0},abSet:{},abHi:[],spX:[],acSrc:[],saveB:0,spAtkB:0,spDcB:0,initB:0,arts:[]};
 }
 
 function compute(S){
@@ -3294,7 +3345,7 @@ function finalize(C){
  const ac=C.ac,cat=ac.armor?ARM[ac.armor][2]:null;
  let spd=C.speed;
  for(const b of C.speedB){if(b.c==='noHeavy'&&cat==='heavy') continue;if(b.c==='noArmor'&&(cat||ac.shield)) continue;spd+=lv(b.v,L);}
- if(cat==='heavy'&&ARM[ac.armor][5]&&C.sc_.str<ARM[ac.armor][5]){spd-=10;C.notes.push(`Сила ниже ${ARM[ac.armor][5]} для доспеха «${ARM[ac.armor][0]}»: скорость −10 фт.`);}
+ if(cat==='heavy'&&ARM[ac.armor][5]&&C.sc_.str<ARM[ac.armor][5]&&!C.flags.arcanearmor){spd-=10;C.notes.push(`Сила ниже ${ARM[ac.armor][5]} для доспеха «${ARM[ac.armor][0]}»: скорость −10 фт.`);}
  C.spd=spd;
  C.moves=C.moveFx.map(m=>({k:m.k,v:m.v==='eq'?spd:m.v,note:m.note||''}));
  for(const s of C.senseAdd) C.senses[s.k]=(C.senses[s.k]||0)+s.v;
@@ -3370,7 +3421,7 @@ function spellcasting(C){
   const extIds=new Set(C.extra.map(x=>x.id));C.pick.can=S.can.filter(id=>inCan(id)&&SPL[id].l===0&&!always.has(id)&&!extIds.has(id)).slice(0,C.cast.can);
   if(C.cast.book) C.pick.book=S.book.filter(id=>inList(id)&&SPL[id].l>=1&&SPL[id].l<=C.maxL).slice(0,C.cast.book);
   if(C.cast.book) for(const id of C.bookIds) if(SPL[id]&&SPL[id].l<=C.maxL&&!C.pick.book.includes(id)) C.pick.book.push(id); // бесплатно в книге
-  C.pick.prep=S.prep.filter(id=>SPL[id]&&SPL[id].l>=1&&SPL[id].l<=C.maxL&&!always.has(id)&&(C.cast.book?C.pick.book.includes(id):inList(id))).slice(0,C.cast.prep);
+  C.pick.prep=S.prep.filter(id=>SPL[id]&&SPL[id].l>=1&&SPL[id].l<=C.maxL&&!always.has(id)&&!extIds.has(id)&&(C.cast.book?C.pick.book.includes(id):inList(id))).slice(0,C.cast.prep);
  }
  const ab=a=>a||(C.cast&&C.cast.ab)||'cha';
  const list=[];
@@ -3397,16 +3448,17 @@ function profW(C,id){
 }
 const fm=m=>m?(m>0?' + '+m:' − '+Math.abs(m)):'';
 function attacks(C){
- const out=[],L=C.L;
+ const out=[],L=C.L,bare=!(C.ac&&(C.ac.armor||C.ac.shield));
  for(const it of C.inv){
   if(it.k!=='w') continue;
   const [n,e,simple,ranged,dmg,typ,fl,rng,vers,mast]=W[it.id];
   const prof=profW(C,it.id);
   const kens=!!C.flags['kensei_'+it.id],hexw=C.nt.hexw===it.id;
-  const monkW=C.flags.monk&&((!ranged&&(simple||fl.includes('L')))||kens);
+  const monkW=C.flags.monk&&bare&&((!ranged&&(simple||fl.includes('L')))||kens);
   let a=ranged?'dex':'str';
   if(fl.includes('F')||monkW) a=C.m.dex>C.m.str?'dex':'str';
   if(hexw&&C.m.cha>C.m[a]) a='cha';
+  const brd=C.flags.battleready&&(it.mb>0||!!it.art)&&C.m.int>C.m[a];if(brd) a='int';
   const m=C.m[a];
   let die=dmg;
   if(monkW){const md=L>=17?'1к12':L>=11?'1к10':L>=5?'1к8':'1к6';if(avgDie(md)>avgDie(dmg)) die=md;}
@@ -3414,6 +3466,7 @@ function attacks(C){
   if(rng) props.push(rng+' фт');
   if(kens) props.push('оружие кенсэя');
   if(hexw) props.push('Ведьмин воин');
+  if(brd) props.push('Готовность к бою: Интеллект');
   const hB=C.flags.hate&&!ranged?Math.max(1,C.m.cha):0;
   if(hB) props.push('Аура ненависти учтена');
   const mb=(it.mb||0)+hB,dB=C.flags.dueling&&!ranged&&!fl.includes('2')?2:0,rs=C.flags.radstrike&&!ranged?' + 1к8 излучением':'';
@@ -3426,16 +3479,21 @@ function attacks(C){
   const props=fl.split('').map(x=>WFLAG[x]).filter(Boolean);if(rng) props.push(rng+' фт');props.push('урон можно сделать некротическим, психическим или излучением');
   const hP=C.flags.hate?Math.max(1,C.m.cha):0;
   out.push({n:n+' (договор)',e,q:1,atk:m+C.pb,dmg:dmg+fm(m+dB+hP)+' '+typ+(C.flags.radstrike?' + 1к8 излучением':''),vers:vers?vers+fm(m):'',props:props.join(', '),mast:'',prof:true});}
+ if(C.ac&&C.ac.armor&&(C.flags.am_dread||C.flags.am_guard||C.flags.am_infil)){const b9=L>=9?1:0,P=L>=15;
+  const mk=(n,e,rg,dmg,typ,props)=>{const a=Math.max(C.m.int,rg?C.m.dex:C.m.str);out.push({n,e,q:1,atk:a+C.pb+b9,dmg:dmg+fm(a+b9)+' '+typ,vers:'',props,mast:'',prof:true});};
+  if(C.flags.am_dread) mk('Силовой разрушитель','Force Demolisher',0,P?'2к6':'1к10','силовым полем','оружие модели; досягаемость 10 фт; цель меньше вас можно толкнуть или притянуть на 10 фт');
+  if(C.flags.am_guard) mk('Громовой импульс','Thunder Pulse',0,P?'1к10':'1к8','звуком','оружие модели; цель атакует не вас с помехой до начала вашего хода');
+  if(C.flags.am_infil) mk('Метатель молний','Lightning Launcher',1,P?'2к6':'1к6','электричеством','оружие модели; 90/300 фт; раз в ход +1к6 электричеством');}
  if(C.flags.spikes&&C.ac&&C.ac.armor==='spiked') out.push({n:'Шипы доспеха',e:'Armor Spikes',q:1,atk:C.m.str+C.pb,dmg:'1к4'+fm(C.m.str)+' колющий',vers:'',props:'бонусным действием в ярости; при успешном захвате — 3 колющего',mast:'',prof:true});
  if(C.flags.bite) out.push({n:'Вампирский укус',e:'Vampiric Bite',q:1,atk:C.m.con+C.pb,dmg:'1к4'+fm(C.m.con)+' колющий'+(C.flags.radstrike?' + 1к8 излучением':''),vers:'',props:'с преимуществом при половине хитов и меньше',mast:'',prof:true});
- let ut='дробящий',ud='1',um=C.m.str,dm=null,uprops=C.flags.unarmedfs?'1к8 без оружия и щита':'';
- if(C.flags.monk){ud=L>=17?'1к12':L>=11?'1к10':L>=5?'1к8':'1к6';um=Math.max(C.m.str,C.m.dex);}
- else if(C.flags.dance){ud=L>=15?'1к12':L>=10?'1к10':L>=5?'1к8':'1к6';um=Math.max(C.m.str,C.m.dex);dm=C.m.dex;uprops='Коллегия танца: без доспехов и щита';}
- else if(C.flags.unarmedfs) ud='1к6';
+ let ut='дробящий',ud='1',um=C.m.str,dm=null,uprops='';
+ if(C.flags.monk&&bare){ud=L>=17?'1к12':L>=11?'1к10':L>=5?'1к8':'1к6';um=Math.max(C.m.str,C.m.dex);}
+ else if(C.flags.dance&&bare){ud=L>=15?'1к12':L>=10?'1к10':L>=5?'1к8':'1к6';um=Math.max(C.m.str,C.m.dex);dm=C.m.dex;uprops='Коллегия танца: без доспехов и щита';}
+ else if(C.flags.unarmedfs){ud='1к8';uprops='Безоружный бой: 1к8 с пустыми руками; если держите оружие или щит — 1к6';}
  else if(C.flags.claws){ud='1к6';ut='рубящий';uprops='когти';}
  else if(C.flags.ram){ud='1к6';uprops='рога (Таран)';}
  else if(C.flags.brawler) ud='1к4';
- out.push({n:'Безоружный удар',e:'Unarmed Strike',q:1,atk:um+C.pb,dmg:(ud==='1'?Math.max(1,1+um)+' '+ut:ud+fm(dm===null?um:dm)+' '+ut)+(C.flags.radstrike?' + 1к8 излучением':''),vers:'',props:uprops,mast:'',prof:true});
+ out.push({n:'Безоружный удар',e:'Unarmed Strike',q:1,atk:um+C.pb,dmg:(ud==='1'?Math.max(0,1+um)+' '+ut:ud+fm(dm===null?um:dm)+' '+ut)+(C.flags.radstrike?' + 1к8 излучением':''),vers:'',props:uprops,mast:'',prof:true});
  if(C.flags.radnec) for(const a of out) a.dmg=a.dmg.replace(' + 1к8 излучением',' + 1к8 некротической энергией');
  C.attacks=out;
 }
@@ -3448,8 +3506,10 @@ function resources(C){
 
 // Текст умения с подстановкой
 function ftext(f,C){return typeof f.t==='function'?f.t(C.L,C):(f.t||'')}
-function spText(sp,L){
- return sp.x.replace(/\{c:(\d+)к(\d+)\}/g,(_,n,d)=>(n*(L>=17?4:L>=11?3:L>=5?2:1))+'к'+d).replace(/\{b\}/g,L>=17?'4':L>=11?'3':L>=5?'2':'1');
+function spText(sp,L,C){
+ let t=sp.x.replace(/\{c:(\d+)к(\d+)\}/g,(_,n,d)=>(n*(L>=17?4:L>=11?3:L>=5?2:1))+'к'+d).replace(/\{b\}/g,L>=17?'4':L>=11?'3':L>=5?'2':'1');
+ if(C&&C.spX) for(const x of C.spX) if(x.id===sp.id) t=t.split(x.re).join(x.to);
+ return t;
 }
 const SHEET_CSS=`.sh{width:194mm;margin:0 auto;color:#111;background:#fff;font:7.6pt/1.3 "PT Serif","Noto Serif",Georgia,"Times New Roman",serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:left}
 .sh *{box-sizing:border-box}
@@ -3565,7 +3625,7 @@ function opt(o){
  return `<button type="button" class="opt${o.on?' on':''}" data-a="${o.a}"${o.c?` data-c="${h(o.c)}"`:''} data-v="${h(o.v)}"${o.dis?' disabled':''}><span class="mk${o.multi?' sq':''}"></span><span class="ob"><span class="on1"><b>${o.n}</b>${o.e?` <i>${o.e}</i>`:''}</span>${o.m?`<small>${o.m}</small>`:''}${o.t?`<span class="ot">${o.t}</span>`:''}${o.why?`<em>${o.why}</em>`:''}${o.on&&o.t?glossUI(o.t):''}</span></button>`;
 }
 function spRow(sp,on,attrs,dis){
- return `<button type="button" class="opt sp${on?' on':''}" ${attrs} data-s="${h((sp.n+' '+sp.e).toLowerCase())}"${dis?' disabled':''}><span class="mk sq"></span><span class="ob"><span class="on1"><b>${sp.n}</b> <i>${sp.e}</i></span><small>${sp.l?sp.l+' круг':'Заговор'}, ${SCHOOL[sp.s].toLowerCase()}${sp.cn?', концентрация':''}${sp.ri?', ритуал':''}</small><span class="ot">${TM[sp.t]||sp.t}; ${sp.r}; ${dur(sp.d)}. ${spFull(sp,CUR?CUR.L:1)}</span>${on?glossUI(spFull(sp,CUR?CUR.L:1)+(sp.cn?' концентрация':'')+(sp.ri?' ритуал':'')):''}</span></button>`;
+ return `<button type="button" class="opt sp${on?' on':''}" ${attrs} data-s="${h((sp.n+' '+sp.e).toLowerCase())}"${dis?' disabled':''}><span class="mk sq"></span><span class="ob"><span class="on1"><b>${sp.n}</b> <i>${sp.e}</i></span><small>${sp.l?sp.l+' круг':'Заговор'}, ${SCHOOL[sp.s].toLowerCase()}${sp.cn?', концентрация':''}${sp.ri?', ритуал':''}</small><span class="ot">${TM[sp.t]||sp.t}; ${sp.r}; ${dur(sp.d)}. ${spFull(sp,CUR?CUR.L:1,CUR)}</span>${on?glossUI(spFull(sp,CUR?CUR.L:1,CUR)+(sp.cn?' концентрация':'')+(sp.ri?' ритуал':'')):''}</span></button>`;
 }
 function seg(a,cur,items,c){return `<div class="seg">${items.map(([v,n])=>`<button type="button" data-a="${a}"${c?` data-c="${c}"`:''} data-v="${v}" class="${String(cur)===String(v)?'on':''}">${n}</button>`).join('')}</div>`}
 
@@ -3581,8 +3641,8 @@ function featReqOk(C,F,ch){
 }
 function reqText(req){return req.split('|').map(r=>r==='caster'?'умение «Использование заклинаний»':r.startsWith('arm:')?'обучение: '+ARMCAT[r.slice(4)]:ABN[r.replace(/\d+/,'')]+' '+r.replace(/\D+/,'')).join(' или ')}
 function spellsFor(C,fx){
- const lst=fx.list==='any'?null:fx.list,max=Math.max(1,C.maxL);
- return SPLA.filter(sp=>(fx.lvl==='max'?sp.l>=1&&sp.l<=max:sp.l===fx.lvl)&&(lst?[...lst].some(c=>sp.cls.includes(c)):sp.cls!=='-')&&(!fx.school||fx.school.includes(sp.s))&&(!fx.rit||sp.ri));
+ const lst=fx.list==='any'?null:fx.list,max=Math.max(1,C.maxL),plus=(fx.plusSub&&fx.plusSub[C.S.sub])||[];
+ return SPLA.filter(sp=>(plus.includes(sp.id)&&sp.l===fx.lvl)||(!fx.book||(C.S.book||[]).includes(sp.id))&&(fx.lvl==='max'?sp.l>=1&&sp.l<=max:sp.l===fx.lvl)&&(lst?[...lst].some(c=>sp.cls.includes(c)):sp.cls!=='-')&&(!fx.school||fx.school.includes(sp.s))&&(!fx.rit||sp.ri));
 }
 function choiceOpts(C,ch){
  const fx=ch.fx,sel=ch.sel,other=(map,v)=>(map[v]||[]).some(s=>s!==ch.id);
@@ -3600,7 +3660,7 @@ function choiceOpts(C,ch){
    return Object.entries(FEATS).filter(([id,F])=>cats.includes(F.cat)||(fx.extra||[]).includes(id)).sort((a,b)=>cats.indexOf(a[1].cat)-cats.indexOf(b[1].cat)).map(([id,F])=>{const fsNo=multi&&F.cat==='fs'&&!C.flags.fsf,ok=featReqOk(C,F,ch)&&!fsNo,taken=C.featIds[id]&&!sel.includes(id)&&!F.rep;
     return {v:id,n:F.n,e:F.e,t:F.t,m:[multi&&CN[F.cat]?CN[F.cat]:'',F.req?'Требование: '+reqText(F.req):''].filter(Boolean).join('. '),dis:!ok||taken,why:fsNo?'нужно умение «Боевой стиль»':!ok?'требование не выполнено':'уже взята'}});}
   case 'opt': {const L=optList(fx);return L.map(o=>{const r=o.req||{},lo=r.l&&r.l>C.L,nd=r.need&&!sel.includes(r.need);
-   return {v:o.v,n:o.n,e:o.e,t:o.t,m:[r.l?'с '+r.l+' уровня':'',r.need?'нужен «'+L.find(x=>x.v===r.need).n+'»':''].filter(Boolean).join(', '),dis:lo||nd,why:lo?'недоступно на этом уровне':'сначала выберите договор'}});}
+   return {v:o.v,n:o.n,e:o.e,t:typeof o.t==='function'?o.t(C.L,C):o.t,m:[r.l?'с '+r.l+' уровня':'',r.need?'нужен «'+L.find(x=>x.v===r.need).n+'»':''].filter(Boolean).join(', '),dis:lo||nd,why:lo?'недоступно на этом уровне':'сначала выберите договор'}});}
   case 'mastery': return Object.keys(W).filter(id=>profW(C,id)&&(!fx.melee||!W[id][3])).map(id=>({v:id,n:W[id][0],e:W[id][1],m:MAST[W[id][9]][0]+': '+MAST[W[id][9]][2]}));
   case 'spell': return spellsFor(C,fx).map(sp=>({v:sp.id,sp}));
  }
@@ -3671,7 +3731,7 @@ function rSpecies(C){
  let s='<p class="lead">Вид определяет размер, скорость и врождённые особенности. Характеристики от вида в правилах 2024 года не зависят: виды из других книг тоже без прибавок, их даёт предыстория.</p>';
  let hid=0;
  for(const [id,sp] of Object.entries(SPEC)){
-  if(sp.exp&&!SET.exp&&S.sp!==id){hid++;continue;}
+  if((sp.exp&&!SET.exp||sp.old)&&S.sp!==id){if(!sp.old) hid++;continue;}
   s+=opt({a:'sp',v:id,on:S.sp===id,n:sp.n+(sp.exp?' <span class="xb">эксп.</span>':''),e:sp.e,m:`${sp.size==='MS'?'Средний или Маленький':sp.size==='S'?'Маленький':'Средний'}, скорость ${sp.spd} фт${sp.src?'; из книги '+sp.src:''}`,t:sp.f.map(f=>f.n+(f.l?` (с ${f.l} ур.)`:'')).join(', ')});
   if(S.sp===id) s+=`<div class="inl">${rChoices(C,3)}</div>`;}
  if(hid) s+=`<p class="hint">Ещё ${hid} экспериментальных вида скрыто — их можно включить на главном экране.</p>`;
@@ -3821,7 +3881,7 @@ function sheetParts(C){
  const lin=C.feats.find(x=>(x.g||'').startsWith('Вид')&&x.sub&&/^(Наследие|Предок)/.test(x.n));
  const clsLine=C.cls?`${C.cls.n} ${C.L}${C.sub?` (${C.sub.n})`:''}`:'';
  let rows=C.attacks.map(a=>`<tr><td><b>${a.n}</b>${a.q>1?' ×'+a.q:''}${a.prof?'':' <i>без владения</i>'}</td><td>${sgn(a.atk)}</td><td>${a.dmg}${a.vers?`<i class="s">двумя руками ${a.vers}</i>`:''}</td><td>${a.props}${a.mast?`<i class="s">Мастерство: ${a.mast}</i>`:''}</td></tr>`).join('');
- for(const s of C.spellList){if(s.sp.l!==0||!/\{c:|\{b\}/.test(s.sp.x)) continue;const m=C.m[s.ab],tx=spText(s.sp,C.L),dm=/(\d+к\d+)\s+([а-яё]+)/.exec(tx),cb=(C.agoT===s.id?C.m.cha:0)+(C.flags.potent&&s.src==='Класс'&&C.cast?C.m[C.cast.ab]:0)+(C.flags.empevo&&s.src==='Класс'&&s.sp.s==='э'?C.m.int:0);
+ for(const s of C.spellList){if(s.sp.l!==0||!/\{c:|\{b\}/.test(s.sp.x)) continue;const m=C.m[s.ab],tx=spText(s.sp,C.L,C),dm=/(\d+к\d+)\s+([а-яё]+)/.exec(tx),cb=(C.agoT===s.id?C.m.cha:0)+(C.flags.potent&&s.src==='Класс'&&C.cast?C.m[C.cast.ab]:0)+(C.flags.empevo&&s.src==='Класс'&&s.sp.s==='э'?C.m.int:0);
   rows+=`<tr><td><b>${s.sp.n}</b> <i>заговор</i></td><td>${/атак\S* заклинанием/i.test(s.sp.x)?sgn(C.pb+m):'Сл '+(8+C.pb+m)}</td><td>${dm?dm[1]+fm(cb)+' '+dm[2]:''}${/\{b\}/.test(s.sp.x)?` <i class="s">лучей: ${C.L>=11?3:C.L>=5?2:1}${cb?', бонус к каждому':''}</i>`:''}</td><td>${ATKR[s.id]||s.sp.r}</td></tr>`;}
  const pr=k=>Object.keys(C.prof[k]);
  const arm=pr('armor').map(a=>ARMCAT[a]).join(', ')||'нет',wpn=pr('weapon').map(w=>WPN[w]||w).join(', ')||'нет';
@@ -3848,7 +3908,7 @@ function sheetParts(C){
  f2+=keys.map(g=>`<h3>${g}</h3>`+groups[g].map(x=>`<p><b>${x.n}</b>${x.e?` <i>${x.e}</i>`:''}${x.l&&x.l>1?` <i>${x.l} ур.</i>`:''}${ftext(x,C)?'. '+ftext(x,C):''}</p>`).join('')).join('');
  if(C.arts.length) f2+=`<h3>Артефакты</h3>`+C.arts.map(a=>{const it=a.item,meta=[artMeta(it),a.on===false?'не активен':''].filter(Boolean).join(', '),eff=(it.effects||[]).map(effText).filter(Boolean).join('; '),sp=(it.spells||[]).map(artSpellText).filter(Boolean).join('; '),ch=it.charges&&+it.charges.n>0?`Заряды: ${it.charges.n} (${recLabel(it.charges.rec,it.charges.rt)})`:'';
   return `<div class="art">${it.img?`<img class="arti" src="${it.img}" alt="" data-ovr="3">`:''}<div><p><b>${h(it.name)}</b>${meta?` <i>${h(meta)}</i>`:''}</p>${it.desc?`<p>${h(it.desc)}</p>`:''}${eff?`<p>${h(eff)}.</p>`:''}${sp?`<p><b>Заклинания:</b> ${h(sp)}.</p>`:''}${ch?`<p>${h(ch)}. ${dots(+it.charges.n<=12?+it.charges.n:0)}</p>`:''}</div></div>`;}).join('');
- const gtxt=C.arts.map(a=>(a.item.desc||'')+' '+(a.item.effects||[]).map(effText).join(' ')).join(' ')+' '+C.feats.map(x=>x.n+' '+ftext(x,C)).join(' ')+' '+C.spellList.map(s=>spFull(s.sp,C.L)+(s.sp.cn?' концентрация':'')+(s.sp.ri?' ритуал':'')).join(' ')+' '+C.mastery.map(id=>MAST[W[id][9]][2]).join(' ')+' '+C.notes.join(' ');
+ const gtxt=C.arts.map(a=>(a.item.desc||'')+' '+(a.item.effects||[]).map(effText).join(' ')).join(' ')+' '+C.feats.map(x=>x.n+' '+ftext(x,C)).join(' ')+' '+C.spellList.map(s=>spFull(s.sp,C.L,C)+(s.sp.cn?' концентрация':'')+(s.sp.ri?' ритуал':'')).join(' ')+' '+C.mastery.map(id=>MAST[W[id][9]][2]).join(' ')+' '+C.notes.join(' ');
  const gl=glossFor(gtxt);
  if(gl.length) f2+=`<h3>Справка: состояния и термины</h3>`+gl.map(([,n,x])=>`<p><b>${n}</b> — ${x}</p>`).join('');
  if(I.looks||I.story) f2+=`<h3>Внешность и история</h3>${I.looks?`<p><b>Внешность.</b> ${h(I.looks)}</p>`:''}${I.story?`<p><b>История и характер.</b> ${h(I.story)}</p>`:''}`;
@@ -3860,8 +3920,8 @@ function sheetParts(C){
   for(const s of C.spellList){const sp=s.sp;if(sp.l!==lastL){lastL=sp.l;tr+=`<div class="spr lv">${sp.l?sp.l+' круг':'Заговоры'}</div>`;}
    const own=C.cast&&s.ab===C.cast.ab&&s.src==='Класс';
    const extraInfo=s.fixed?`${s.note}; Сл ${s.fixed.dc}, атака ${sgn(s.fixed.atk)}`:(s.note||'')+(!C.cast||s.ab!==C.cast.ab?`${s.note?'; ':''}${ABS[s.ab]}, Сл ${8+C.pb+C.m[s.ab]}, атака ${sgn(C.pb+C.m[s.ab])}`:'');
-   tr+=`<div class="spr"><span><b>${sp.n}</b><i class="s">${sp.e}</i>${!own&&extraInfo?`<small>${extraInfo}</small>`:''}</span><span>${TM[sp.t]||sp.t}</span><span>${sp.r}</span><span>${sp.cn?'К, ':''}${dur(sp.d)}${sp.ri?', ритуал':''}</span><span>${sp.c}${SPMAT[sp.id]?'*':''}</span><span>${spFull(sp,C.L)}</span></div>`;}
-  if(C.bookOnly.length){tr+=`<div class="spr lv">Книга заклинаний — не подготовлены (ритуалы можно творить без подготовки)</div>`;for(const sp of C.bookOnly) tr+=`<div class="spr"><span><b>${sp.n}</b><i class="s">${sp.e}</i><small>${sp.l} круг${sp.ri?'; ритуал — доступен без подготовки':''}</small></span><span>${TM[sp.t]||sp.t}</span><span>${sp.r}</span><span>${sp.cn?'К, ':''}${dur(sp.d)}${sp.ri?', ритуал':''}</span><span>${sp.c}${SPMAT[sp.id]?'*':''}</span><span>${spFull(sp,C.L)}</span></div>`;}
+   tr+=`<div class="spr"><span><b>${sp.n}</b><i class="s">${sp.e}</i>${!own&&extraInfo?`<small>${extraInfo}</small>`:''}</span><span>${TM[sp.t]||sp.t}</span><span>${sp.r}</span><span>${sp.cn?'К, ':''}${dur(sp.d)}${sp.ri?', ритуал':''}</span><span>${sp.c}${SPMAT[sp.id]?'*':''}</span><span>${spFull(sp,C.L,C)}</span></div>`;}
+  if(C.bookOnly.length){tr+=`<div class="spr lv">Книга заклинаний — не подготовлены (ритуалы можно творить без подготовки)</div>`;for(const sp of C.bookOnly) tr+=`<div class="spr"><span><b>${sp.n}</b><i class="s">${sp.e}</i><small>${sp.l} круг${sp.ri?'; ритуал — доступен без подготовки':''}</small></span><span>${TM[sp.t]||sp.t}</span><span>${sp.r}</span><span>${sp.cn?'К, ':''}${dur(sp.d)}${sp.ri?', ритуал':''}</span><span>${sp.c}${SPMAT[sp.id]?'*':''}</span><span>${spFull(sp,C.L,C)}</span></div>`;}
   P.f3=tr+`<p class="foot">К — концентрация. В, С, М — словесный, соматический и материальный компоненты; М* — ценный компонент, подробности в эффекте.</p>`;
  }
  return P;
@@ -4121,7 +4181,7 @@ function init(){
   if(t.id==='porin'){const file=t.files&&t.files[0];t.value='';if(file) readPortrait(file);return;}
   if(t.id==='imp'){const file=t.files&&t.files[0];if(!file) return;const fr=new FileReader();
    fr.onload=()=>{const u=new Uint8Array(fr.result);
-    if(String.fromCharCode.apply(null,u.subarray(0,5))==='%PDF-'){const s=new TextDecoder('latin1').decode(u.subarray(0,Math.min(u.length,500000))),mm=/%DND24:([A-Za-z0-9+\/=]+)/.exec(s);
+    if(String.fromCharCode.apply(null,u.subarray(0,5))==='%PDF-'){const s=new TextDecoder('latin1').decode(u.subarray(0,Math.min(u.length,40000000))),mm=/%DND24:([A-Za-z0-9+\/=]+)/.exec(s);
      if(!mm){UI.msg='В этом PDF нет персонажа: загрузить можно только PDF, скачанный из конструктора.';render();return;}
      try{importText(new TextDecoder().decode(b64u8(mm[1])),'из PDF');}catch(e){UI.msg='PDF повреждён.';render();}}
     else{const txt=new TextDecoder().decode(u);let j=null;try{j=JSON.parse(txt)}catch(_){}if(j&&(j.format==='dnd24-artifact'||j.format==='dnd24-artifact-item')) importArtifact(txt,false); else importText(txt,'из файла');}};
