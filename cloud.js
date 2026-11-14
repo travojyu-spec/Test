@@ -30,6 +30,9 @@
   const HOME = './';                    // ссылка «Все инструменты»
 
   const META = 'cloud-meta-v1', TOAST = 'cloud-toast';
+  // Пробный сайт (/Test/) хранит данные отдельно от рабочего: свои ключи в браузере и свой набор в облаке.
+  // На рабочем сайте NS пустой, и всё работает как раньше.
+  const NS = /^\/test(\/|$)/i.test(location.pathname) ? 'test:' : '';
   const SEP = '~', RAW = '\u0000raw:', MK = '__cloudArr', ID_FIELDS = ['id', 'iid'];
   const CHUNK = 300000, SPLIT_MIN = 4096, DEBOUNCE = 2500, MAXWAIT = 15000;
 
@@ -43,21 +46,23 @@
   let userActive = false;
   const ours = k => typeof k === 'string' && PREFIXES.some(p => k.startsWith(p));
   const isSynced = k => ours(k) && k.indexOf(SEP) < 0 && !EXCLUDE.includes(k);
+  const nsk = k => NS && (ours(k) || k === META) ? NS + k : k;        // логический ключ → ключ в хранилище
+  const lk = r => !NS ? r : (typeof r === 'string' && r.startsWith(NS) ? r.slice(NS.length) : null); // обратно
 
   SP.getItem = function (k) {
     if (this === LS && isSynced(String(k))) readKeys.add(String(k));
-    return oGet.call(this, k);
+    return oGet.call(this, this === LS ? nsk(String(k)) : k);
   };
   SP.setItem = function (k, v) {
     k = String(k);
     if (this === LS && blocked.has(k)) return; // страница перезагружается с новыми данными
-    oSet.call(this, k, v);
+    oSet.call(this, this === LS ? nsk(k) : k, v);
     if (this === LS && isSynced(k)) changed(k);
   };
   SP.removeItem = function (k) {
     k = String(k);
     if (this === LS && blocked.has(k)) return;
-    oRem.call(this, k);
+    oRem.call(this, this === LS ? nsk(k) : k);
     if (this === LS && isSynced(k)) changed(k);
   };
   // Записи до первого касания — служебные (страница сохранила себя при загрузке),
@@ -69,13 +74,13 @@
   const blank = () => ({ uid: null, base: {}, n: {}, kt: {}, first: false });
   function loadMeta() {
     try {
-      const m = JSON.parse(oGet.call(LS, META));
+      const m = JSON.parse(oGet.call(LS, nsk(META)));
       if (m && typeof m === 'object') return Object.assign(blank(), m);
     } catch (e) {}
     return blank();
   }
   let meta = loadMeta();
-  function saveMeta() { try { oSet.call(LS, META, JSON.stringify(meta)); } catch (e) {} }
+  function saveMeta() { try { oSet.call(LS, nsk(META), JSON.stringify(meta)); } catch (e) {} }
   // перечитать (могла писать другая вкладка), сохранив свежие отметки правок
   function refreshMeta(uid) {
     const m = loadMeta(), kt = meta.kt;
@@ -175,7 +180,7 @@
 
   const cache = new Map(); // key → { raw, docs: { id: {s, h} } }
   function docsOf(key) {
-    const raw = oGet.call(LS, key), c = cache.get(key);
+    const raw = oGet.call(LS, nsk(key)), c = cache.get(key);
     if (c && c.raw === raw) return c.docs;
     const docs = {};
     if (raw != null) { const sp = split(key, raw); for (const id in sp) docs[id] = { s: sp[id], h: hash(sp[id]) }; }
@@ -184,7 +189,7 @@
   }
   function localDocs() {
     const all = {};
-    for (let i = 0; i < LS.length; i++) { const k = LS.key(i); if (isSynced(k)) Object.assign(all, docsOf(k)); }
+    for (let i = 0; i < LS.length; i++) { const k = lk(LS.key(i)); if (k && isSynced(k)) Object.assign(all, docsOf(k)); }
     return all;
   }
 
@@ -193,8 +198,8 @@
   let phase = location.protocol === 'file:' ? 'file' : 'loading'; // file | loading | noload | ready
   let status = 'out', statusErr = '', lastOk = 0, lastPull = 0, tmr = 0, metaT = 0, firstDirty = 0, retryT = 0;
 
-  const dref = (uid, id, i) => Fs.doc(db, 'users', uid, 'docs', encodeURIComponent(id) + (i ? '#' + i : ''));
-  const mref = uid => Fs.doc(db, 'users', uid, 'meta', 'manifest');
+  const dref = (uid, id, i) => Fs.doc(db, 'users', uid, 'docs', encodeURIComponent(NS + id) + (i ? '#' + i : ''));
+  const mref = uid => Fs.doc(db, 'users', uid, 'meta', NS ? 'manifest-test' : 'manifest');
 
   async function boot() {
     if (phase === 'file') return render();
@@ -300,8 +305,8 @@
       for (const id of drops) if (keyOf(id) === key) delete cur[id];
       let raw;
       try { raw = join(key, cur); } catch (e) { continue; }
-      if (raw !== oGet.call(LS, key)) {
-        try { raw == null ? oRem.call(LS, key) : oSet.call(LS, key, raw); }
+      if (raw !== oGet.call(LS, nsk(key))) {
+        try { raw == null ? oRem.call(LS, nsk(key)) : oSet.call(LS, nsk(key), raw); }
         catch (e) { setStatus('error', 'В браузере не хватает места для данных из облака. Удалите лишнее и нажмите «Синхронизировать».'); continue; }
         fresh.push(key);
       }
@@ -408,8 +413,8 @@
     saveMeta(); ui.wipe = false;
     if (wipe) {
       const ks = [];
-      for (let i = 0; i < LS.length; i++) { const k = LS.key(i); if (ours(k)) ks.push(k); }
-      ks.forEach(k => oRem.call(LS, k)); cache.clear();
+      for (let i = 0; i < LS.length; i++) { const k = lk(LS.key(i)); if (k && ours(k)) ks.push(k); }
+      ks.forEach(k => oRem.call(LS, nsk(k))); cache.clear();
       try { sessionStorage.setItem(TOAST, 'Вы вышли, данные с этого устройства стёрты'); } catch (e) {}
       location.reload();
     } else setMsg('Вы вышли. Данные остались в этом браузере.', 'ok');
@@ -509,7 +514,7 @@ button,input{font:inherit;color:inherit}
   const viewOf = () => phase !== 'ready' ? phase : user ? 'in' : 'out';
 
   function panelHTML(view, inline) {
-    const head = `<div class="hd"><h2>Облачное сохранение<small lang="en">Cloud save</small></h2>${inline ? '' : `<button type="button" class="x" data-c="close" aria-label="Закрыть">${CLOSE}</button>`}</div>`;
+    const head = `<div class="hd"><h2>Облачное сохранение<small lang="en">${NS ? 'Пробный сайт — данные отдельно от рабочего' : 'Cloud save'}</small></h2>${inline ? '' : `<button type="button" class="x" data-c="close" aria-label="Закрыть">${CLOSE}</button>`}</div>`;
     const home = inline ? '' : `<a class="home" href="${HOME}">Все инструменты</a>`;
     if (view === 'file') return head + `<p class="lead">Вход работает, когда сайт открыт по адресу в интернете (например, на GitHub Pages). Сейчас страница открыта из файла, поэтому данные хранятся только в этом браузере.</p>` + home;
     if (view === 'loading') return head + `<p class="lead">Подключаюсь…</p>` + home;
