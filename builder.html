@@ -194,6 +194,11 @@ details.all li .ot2{display:block;color:var(--mu);font-size:14px;line-height:1.4
 .av.ph{display:inline-block;background:var(--sf2)}
 .ros .del{flex:none;align-self:stretch;min-width:48px;border:0;border-left:1px solid var(--ln);background:none;color:var(--mu);font-size:20px;cursor:pointer;padding:0 12px}
 .ros .del.on{background:var(--wns);color:var(--wn);font-size:13px;font-weight:600}
+.ros .arcb{flex:none;align-self:stretch;min-width:48px;border:0;border-left:1px solid var(--ln);background:none;color:var(--mu);cursor:pointer;padding:0 12px;display:flex;align-items:center;justify-content:center}
+.ros.arc{background:var(--sf2)}
+.arch{display:flex;width:100%;gap:12px;align-items:center;padding:12px;margin:4px 0 8px;background:none;border:1px dashed var(--ln);border-radius:12px;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.arch b{flex:1;font-weight:600}.arch svg{color:var(--mu);flex:none}.arch .chev{color:var(--mu);font-size:18px;transition:transform .15s}.arch.on .chev{transform:rotate(90deg)}
+.arcw{margin:0 0 8px}
 .xb{display:inline-block;font:600 11px/1.6 var(--sans);color:var(--br);border:1px solid var(--br);border-radius:99px;padding:0 7px;margin-left:4px;vertical-align:2px}
 .segw .seg button{font-size:15px;padding:8px 4px}
 .stats .fly{font-style:normal;font-size:11px;color:var(--ac)}
@@ -4578,12 +4583,18 @@ function roster(){try{return JSON.parse(localStorage.getItem(RKEY))||[]}catch(e)
 function setRoster(r){try{localStorage.setItem(RKEY,JSON.stringify(r));return true}catch(e){return false}}
 function summaryOf(st){const c=CLS[st.cls],sp=SPEC[st.sp];return [c?c.n+' '+st.lvl:'',sp?sp.n.toLowerCase():''].filter(Boolean).join(', ')||'не заполнен'}
 function loadState(s){S=Object.assign(newState(),s);S.info=Object.assign(newState().info,s.info||{});}
-function rRoster(){const r=roster();if(!r.length) return '<p class="hint">Пока пусто: созданные персонажи будут появляться здесь сами.</p>';return r.map(e=>`<div class="ros${e.id===S.rid?' cur':''}"><button type="button" class="rosb" data-a="ropen" data-v="${e.id}">${porImg('av',e.st)||'<span class="av ph" aria-hidden="true"></span>'}<span class="rt"><b>${h(e.name)}</b><span>${h(e.sum)}${e.id===S.rid?', открыт сейчас':''}</span></span></button><button type="button" class="del${UI.del===e.id?' on':''}" data-a="rdel" data-v="${e.id}">${UI.del===e.id?'Удалить?':'×'}</button></div>`).join('')}
+const IC_ARC='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M10 13h4"/></svg>',IC_UNARC='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M9.5 15.5 12 13l2.5 2.5M12 13v5"/></svg>';
+function rosRow(e){const del=UI.del===e.id;return `<div class="ros${e.id===S.rid?' cur':''}${e.arc?' arc':''}"><button type="button" class="rosb" data-a="ropen" data-v="${e.id}">${porImg('av',e.st)||'<span class="av ph" aria-hidden="true"></span>'}<span class="rt"><b>${h(e.name)}</b><span>${h(e.sum)}${e.id===S.rid?', открыт сейчас':''}</span></span></button>${del?'':`<button type="button" class="arcb" data-a="rarc" data-v="${e.id}" aria-label="${e.arc?'Вернуть из архива':'В архив'}" title="${e.arc?'Вернуть из архива':'В архив'}">${e.arc?IC_UNARC:IC_ARC}</button>`}<button type="button" class="del${del?' on':''}" data-a="rdel" data-v="${e.id}">${del?'Удалить?':'×'}</button></div>`}
+function rRoster(){const r=roster(),act=r.filter(e=>!e.arc),arc=r.filter(e=>e.arc);if(!r.length) return '<p class="hint">Пока пусто: созданные персонажи будут появляться здесь сами.</p>';
+ let s=act.length?act.map(rosRow).join(''):'<p class="hint">Все персонажи в архиве.</p>';
+ if(arc.length){s+=`<button type="button" class="arch${UI.arc?' on':''}" data-a="rarcv" aria-expanded="${UI.arc?'true':'false'}">${IC_ARC}<b>Архив</b><span class="cnt">${arc.length}</span><span class="chev" aria-hidden="true">›</span></button>`;
+  if(UI.arc) s+=`<div class="arcw">${arc.map(rosRow).join('')}</div>`;}
+ return s;}
 function collapsed(id,n,left,count){if(count<=8||left>0||UI.open[id]) return false;return n===1?true:!UI.touched[id];}
 const moreBtn=id=>`<button type="button" class="btn ghost sm" data-a="open" data-c="${h(id)}">Показать все варианты</button>`;
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1){S=Object.assign(newState(),s);S.info=Object.assign(newState().info,s.info||{});}}catch(e){}}
 const hasContent=()=>!!(S.cls||S.bg||S.sp||S.info.name||S.portrait);
-function upsertRoster(){const r=roster();if(!S.rid) S.rid='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);const e={id:S.rid,name:S.info.name||'Без имени',sum:summaryOf(S),at:Date.now(),st:JSON.parse(JSON.stringify(Object.assign({},S,{step:0})))};const i=r.findIndex(x=>x.id===S.rid);if(i>=0) r.splice(i,1);r.unshift(e);return setRoster(r);}
+function upsertRoster(){const r=roster();if(!S.rid) S.rid='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);const e={id:S.rid,name:S.info.name||'Без имени',sum:summaryOf(S),at:Date.now(),st:JSON.parse(JSON.stringify(Object.assign({},S,{step:0})))};const i=r.findIndex(x=>x.id===S.rid);if(i>=0){if(r[i].arc) e.arc=1;r.splice(i,1);}r.unshift(e);return setRoster(r);}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));if(hasContent()&&!upsertRoster()) UI.toast='Не хватает места в хранилище браузера: удалите лишних персонажей или портреты.';return true}catch(e){UI.toast='Хранилище браузера переполнено: удалите лишних персонажей или портрет.';return false}}
 const h=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const hid=s=>s.replace(/[^a-z0-9]/gi,'_');
@@ -4848,7 +4859,7 @@ function rHome(){
 <button type="button" class="btn pri big" data-a="new">Создать персонажа</button>
 ${has?`<button type="button" class="cont" data-a="cont">${porImg('av',S)}<span class="cb1"><small>Продолжить</small><b>${h(S.info.name)||'Без имени'}</b><span>${h(summaryOf(S))}, шаг «${STEPS[S.step].n}»</span></span><span class="arr" aria-hidden="true">›</span></button>`:''}
 <h2>Материалы</h2><div class="segw">${seg('exp',SET.exp?1:0,[[0,'Основные'],[1,'Экспериментальные']])}</div>${SET.exp?`<p class="hint">Отметьте, из каких книг брать варианты. Старые карточки, у которых есть новая версия, видны только в сохранённых персонажах.</p><div class="srcs">${SRCG.map(([k,n,d])=>opt({a:'srct',v:k,on:!(SET.off||{})[k],multi:1,n,m:[d,srcCount(k)].filter(Boolean).join(' · ')})).join('')}</div>`:'<p class="hint">Только PHB 2024 и проверенные дополнения. «Экспериментальные» добавят варианты из других книг — какие именно, можно выбрать.</p>'}
-<h2>Мои персонажи${rs.length?` <span class="cnt">${rs.length}</span>`:''}</h2><div class="rosw">${rRoster()}</div>
+<h2>Мои персонажи${rs.filter(e=>!e.arc).length?` <span class="cnt">${rs.filter(e=>!e.arc).length}</span>`:''}</h2><div class="rosw">${rRoster()}</div>
 <h2>Загрузить</h2><div class="acts"><label class="btn">Из PDF или файла<input id="imp" type="file" accept=".pdf,application/pdf,.json,application/json" hidden></label><button type="button" class="btn ghost" data-a="hcode">${UI.hcode?'Скрыть':'По коду'}</button></div>
 ${UI.hcode?`<div class="codeb"><label class="fl">Вставьте код персонажа<textarea id="codein" rows="4" placeholder="{&quot;v&quot;:1,…}"></textarea></label><button type="button" class="btn sm" data-a="paste">Загрузить из кода</button></div>`:''}
 ${UI.msg?`<p class="msg" role="status">${UI.msg}</p>`:''}
@@ -5046,8 +5057,11 @@ function act(a,c,v){
   case 'hcode': UI.hcode=UI.hcode?0:1;break;
   case 'exp': SET.exp=v==='1';saveSet();UI.toast=SET.exp?'Экспериментальные материалы включены.':'Только основные материалы.';break;
   case 'srct': SET.off=Object.assign({},SET.off);SET.off[v]=!SET.off[v];saveSet();break;
-  case 'rsave': {const r=roster();if(!S.rid||!r.some(e=>e.id===S.rid)) S.rid=S.rid||'c'+Date.now().toString(36);const e={id:S.rid,name:S.info.name||'Без имени',sum:summaryOf(S),at:Date.now(),st:JSON.parse(JSON.stringify(Object.assign({},S,{step:0})))};const i=r.findIndex(x=>x.id===S.rid);if(i>=0) r[i]=e; else r.unshift(e);UI.msg=setRoster(r)?'Сохранено в «Мои персонажи».':'Не удалось сохранить: хранилище браузера недоступно в этом окне.';break;}
+  case 'rsave': {const r=roster();if(!S.rid||!r.some(e=>e.id===S.rid)) S.rid=S.rid||'c'+Date.now().toString(36);const e={id:S.rid,name:S.info.name||'Без имени',sum:summaryOf(S),at:Date.now(),st:JSON.parse(JSON.stringify(Object.assign({},S,{step:0})))};const i=r.findIndex(x=>x.id===S.rid);if(i>=0){if(r[i].arc) e.arc=1;r[i]=e;} else r.unshift(e);UI.msg=setRoster(r)?'Сохранено в «Мои персонажи».':'Не удалось сохранить: хранилище браузера недоступно в этом окне.';break;}
   case 'ropen': {const e=roster().find(x=>x.id===v);if(!e) break;loadState(e.st);S.rid=e.id;S.step=10;UI.view='wiz';UI.msg='';UI.toast='Открыт «'+e.name+'».';UI.del=null;return 'nav';}
+  case 'rarc': {const r=roster(),e=r.find(x=>x.id===v);if(!e) break;if(e.arc) delete e.arc; else e.arc=1;UI.del=null;
+   UI.toast=setRoster(r)?(e.arc?`«${e.name}» — в архиве.`:`«${e.name}» снова в списке.`):'Не удалось сохранить: хранилище браузера недоступно.';render();return 'none';}
+  case 'rarcv': UI.arc=!UI.arc;UI.del=null;render();return 'none';
   case 'rdel': {if(UI.del!==v){UI.del=v;break;}setRoster(roster().filter(x=>x.id!==v));if(S.rid===v){S=newState();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}UI.del=null;UI.toast='Персонаж удалён.';render();return 'none';}
   case 'code': UI.code=UI.code?0:1;break;
   case 'open': UI.open[c]=1;break;
@@ -5272,7 +5286,7 @@ function migrateItem(it){let ch=false;
  if(ch) putItem(it);return it;}
 function rEditor(it){
  migrateItem(it);
- const roster_=roster();
+ const roster_=roster().sort((a,b)=>(a.arc?1:0)-(b.arc?1:0));
  let s=`<main class="home forge"><button type="button" class="hb" data-a="fback">‹ Все артефакты</button><h1>${h(it.name)||'Без названия'}</h1>`;
  s+=`<div class="porw">${it.img?`<img class="fimg" src="${it.img}" alt="">`:'<div class="pempty fimg">Нет картинки</div>'}<div class="pact"><label class="btn">${it.img?'Заменить картинку':'Добавить картинку'}<input id="fimgin" type="file" accept="image/*" hidden></label>${it.img?'<button type="button" class="btn ghost" data-a="fimgdel">Убрать</button>':''}</div></div>`;
  s+=`<label class="fl">Название<input data-fk="name" value="${h(it.name)}" maxlength="80" placeholder="Например, Клинок рассвета"></label>`;
@@ -5290,7 +5304,7 @@ function rEditor(it){
  if(UI.fsp) s+=`<input class="srch" type="search" placeholder="Поиск по названию" data-f="f-fsp" value="${h(UI.filter['f-fsp']||'')}"><div id="f-fsp" class="fsp">${SPLA.map(sp=>`<button type="button" class="opt sp" data-a="fsadd" data-v="${sp.id}" data-s="${h((sp.n+' '+sp.e).toLowerCase())}"><span class="mk plus">+</span><span class="ob"><span class="on1"><b>${sp.n}</b> <i>${sp.e}</i></span><small>${sp.l?sp.l+' круг':'Заговор'}, ${SCHOOL[sp.s].toLowerCase()}</small></span></button>`).join('')}</div>`;
  if(it.spells.length) s+=`<p class="fl">Сл и атака заклинаний предмета</p>`+seg('fdc',it.dc.mode,[['owner','Как у владельца'],['fixed','Свои значения']])+(it.dc.mode==='fixed'?`<div class="effr">${numIn('dc.dc',it.dc.dc,'Сл спасброска',1)}${numIn('dc.atk',it.dc.atk,'Бонус атаки')}</div>`:'');
  s+=`<h2>Как будет на листе</h2>${artPreview(it)}`;
- s+=`<h2>Выдать</h2><p class="hint">Добавит копию артефакта в инвентарь выбранного персонажа на этом устройстве.</p>`+(roster_.length?`<div class="rosw">${roster_.map(e=>`<div class="ros"><button type="button" class="rosb" data-a="fgive" data-c="${e.id}">${porImg('av',e.st)||'<span class="av ph" aria-hidden="true"></span>'}<span class="rt"><b>${h(e.name)}</b><span>${h(e.sum)}</span></span></button></div>`).join('')}</div>`:'<p class="hint">Пока нет персонажей на этом устройстве.</p>');
+ s+=`<h2>Выдать</h2><p class="hint">Добавит копию артефакта в инвентарь выбранного персонажа на этом устройстве.</p>`+(roster_.length?`<div class="rosw">${roster_.map(e=>`<div class="ros"><button type="button" class="rosb" data-a="fgive" data-c="${e.id}">${porImg('av',e.st)||'<span class="av ph" aria-hidden="true"></span>'}<span class="rt"><b>${h(e.name)}</b><span>${h(e.sum)}${e.arc?', в архиве':''}</span></span></button></div>`).join('')}</div>`:'<p class="hint">Пока нет персонажей на этом устройстве.</p>');
  s+=`<h2>Отправить игроку</h2><div class="acts"><button type="button" class="btn pri" data-a="fdl">Скачать файл артефакта</button><button type="button" class="btn ghost" data-a="fcode">${UI.fcode?'Скрыть код':'Код артефакта'}</button></div><p class="hint">Игрок загружает файл на главной («Загрузить» → «Из PDF или файла»), в мастерской или прямо в снаряжении персонажа.</p>`;
  if(UI.fcode) s+=`<div class="codeb"><label class="fl">Код артефакта${it.img&&it.img.length>40000?' (без картинки — она слишком большая для кода)':''}<textarea id="fcodeout" rows="4" readonly>${h(artCode(it))}</textarea></label><button type="button" class="btn sm" data-a="fcopy">Скопировать код</button></div>`;
  s+=`<div class="acts" style="margin-top:26px"><button type="button" class="btn ghost" data-a="fdel" data-v="${it.iid}">${UI.fdel===it.iid?'Точно удалить? Нажмите ещё раз':'Удалить артефакт'}</button></div>`;

@@ -84,6 +84,7 @@ button,input,textarea{font:inherit;color:inherit}
 .chips button{border:1px solid var(--ln);background:var(--sf);border-radius:99px;padding:6px 12px;font-size:14px;cursor:pointer}
 .chips button.on{background:var(--ac);color:var(--aci);border-color:var(--ac)}
 .mo{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:9px 12px;margin:0 0 6px;cursor:pointer}
+.mo.arch{border-style:dashed;background:none}
 .mb{flex:1;min-width:0}
 .mb i{font-style:normal;color:var(--mu);font-size:12px}
 .mb small{display:block;color:var(--mu);font-size:12px}
@@ -4536,6 +4537,7 @@ function act(a,v,c,el){
   case 'tab': V.tab=v;break;
   case 'cr': V.cr=v;V.resetScroll=1;break;
   case 'addm': {if(V.target){const pr=prepById(V.target);if(pr){const it=prepAdd(pr,{kind:'m',me:v});V.toast=`${MON[MI[v]].n} ×${it.n} в заготовке.`;}break;}const k=addMonster(v);V.toast=`${k.name} в бою.`;break;}
+  case 'arcv': V.arc=!V.arc;break;
   case 'addr': {const e=rosterList().find(r=>r.id===v);if(e){const k=addPC(Object.assign(newStateLite(),e.st));V.toast=`${k.name} в бою.`;}break;}
   case 'addc': {const n=document.getElementById('cn').value.trim()||'Существо',hp=Math.max(1,+document.getElementById('chp').value||10),ac=+document.getElementById('cac').value||12,dm=+document.getElementById('cdx').value||0;
    if(V.target){const pr=prepById(V.target);if(pr){prepAdd(pr,{kind:'c',name:n,hp,ac,dexm:dm});V.toast=`${n} в заготовке.`;}break;}
@@ -4638,8 +4640,8 @@ function sheet(){
    if(list.length>150) s+=`<p class="hint">Показаны первые 150 из ${list.length}. Уточните поиск.</p>`;
    s+=`</div><p class="src">${MON.length} существа · правила SRD 5.2.1. Нажмите несколько раз, чтобы добавить несколько.</p>`;
   } else if(V.tab==='p'){
-   const r=rosterList();
-   s+=r.length?r.map(e=>`<button type="button" class="mo" data-a="addr" data-v="${e.id}">${e.st&&e.st.portrait?`<img class="av" src="${e.st.portrait}" alt="">`:'<span class="ic">🛡️</span>'}<span class="mb"><b>${esc(e.name)}</b><small>${esc(e.sum)}</small></span><span class="pl">+</span></button>`).join(''):'<p class="hint">Персонажей конструктора на этом устройстве не видно. Если трекер открыт с того же сайта, что и конструктор, они появятся здесь сами. Иначе загрузите PDF или код персонажа.</p>';
+   const r=rosterList(),ra=r.filter(e=>!e.arc),rz=r.filter(e=>e.arc),pcB=e=>`<button type="button" class="mo" data-a="addr" data-v="${e.id}">${e.st&&e.st.portrait?`<img class="av" src="${e.st.portrait}" alt="">`:'<span class="ic">🛡️</span>'}<span class="mb"><b>${esc(e.name)}</b><small>${esc(e.sum)}</small></span><span class="pl">+</span></button>`;
+   s+=r.length?ra.map(pcB).join('')+(rz.length?`<button type="button" class="mo arch${V.arc?' on':''}" data-a="arcv" aria-expanded="${V.arc?'true':'false'}"><span class="ic">🗃️</span><span class="mb"><b>Архив</b><small>Персонажи из архива конструктора: ${rz.length}</small></span><span class="pl">${V.arc?'▾':'▸'}</span></button>`+(V.arc?rz.map(pcB).join(''):''):''):'<p class="hint">Персонажей конструктора на этом устройстве не видно. Если трекер открыт с того же сайта, что и конструктор, они появятся здесь сами. Иначе загрузите PDF или код персонажа.</p>';
    s+=`<div class="acts"><label class="btn">Загрузить PDF или файл<input id="pcf" type="file" accept=".pdf,application/pdf,.json,application/json" hidden></label><button type="button" class="btn ghost" data-a="code">${V.code?'Скрыть':'По коду'}</button></div>${V.code?`<label class="fl">Код персонажа из конструктора<textarea id="pcode" rows="4"></textarea></label><button type="button" class="btn" data-a="pastec">Добавить по коду</button>`:''}`;
   } else {
    s+=`<label class="fl">Название<input id="cn" placeholder="Например, Страж ворот"></label><div class="g3"><label class="fl">Хиты<input id="chp" type="number" inputmode="numeric" value="10"></label><label class="fl">КД<input id="cac" type="number" inputmode="numeric" value="12"></label><label class="fl">Бонус Лов<input id="cdx" type="number" inputmode="numeric" value="0"></label></div><button type="button" class="btn pri" data-a="addc">Добавить</button>`;
